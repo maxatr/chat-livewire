@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Room;
 use Illuminate\Http\Request;
 
 class ChatController extends Controller
@@ -23,6 +24,15 @@ class ChatController extends Controller
      */
     public function index()
     {
-        return view('chat');
+        $rooms = Room::get();
+
+        return view('chat', compact('rooms'));
+    }
+
+    public function show(Room $room)
+    {
+        $messages = $room->messages()->with(['user'])->latest()->get();
+
+        return view('chat.room', compact('room', 'messages'));
     }
 }
