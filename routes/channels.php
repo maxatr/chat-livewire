@@ -11,6 +11,8 @@
 |
 */
 
-Broadcast::channel('App.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+use Illuminate\Support\Arr;
+
+Broadcast::channel('chat.{roomId}', function ($user) {
+    return Arr::only($user->toArray(), ['id', 'name']);
 });
