@@ -1,7 +1,7 @@
-<div x-data="formScope()">
+<div x-data="formScope()" x-init="watchTyping">
     <form action="" wire:submit.prevent="send">
         <div class="form-group">
-            <textarea rows="3" class="form-control" wire:model="body" x-on:keydown.enter="submit"></textarea>
+            <textarea rows="3" class="form-control" wire:model="body" x-on:keydown="setTypingState" x-on:keydown.enter="submit"></textarea>
         </div>
 
         <button type="submit" class="btn btn-secondary btn-block" x-ref="submit">Send</button>
@@ -9,12 +9,39 @@
 </div>
 
 <script>
-    function formScope() {
+    function formScope () {
+        let typingTimer;
+
         return {
-            submit(e) {
+            typing: false,
+            submit (e) {
                 if (e.shiftKey) return
 
                 this.$refs.submit.click()
+            },
+            setTypingState () {
+                this.typing = true
+
+                clearTimeout(typingTimer)
+                typingTimer = setTimeout(() => {
+                    this.typing = false
+                }, 2000)
+            },
+            watchTyping () {
+                setTimeout(() => {
+                    this.whisperTyping(false)
+                }, 2000)
+
+                this.$watch('typing', (typing) => {
+                    this.whisperTyping(typing)
+                })
+            },
+            whisperTyping (typing) {
+                Echo.private('chat.{{ $room->id }}')
+                    .whisper('typing', {
+                        id: user.id,
+                        typing
+                    })
             }
         };
     }
